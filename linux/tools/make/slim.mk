@@ -1,5 +1,5 @@
 ###############################################################################
-# Verison: v2.0.0
+# Verison: v2.1.0
 # Author:  xflm
 # Date:    Sat Dec 19 09:11:46 CST 2020
 ###############################################################################
@@ -26,7 +26,7 @@ ifeq ($(TARGET_MAP),)
 	@$(CC) -o $(TARGET_ELF) $(LDFLAGS) $(OBJ_FILE) $(LIB_FILE) \
 -Wl,--cref,-Map=$(BUILD_DIR)/slim.map
 else
-	@mv $(TARGET_MAP) $(BUILD_DIR)/slim.map
+	@cp $(TARGET_MAP) $(BUILD_DIR)/slim.map
 endif # ifeq ($(TARGET_MAP),)
 endif # ifeq ($(findstring --gc-sections, $(LDFLAGS)),)
 	@mkdir -p make_slim_bak;RECOVER_SCRIPT="#!/bin/bash^ ^"; \
@@ -37,12 +37,20 @@ chmod +x make_slim_bak/recover.sh
 ifeq ($(VPATH_MODE),y)
 	@REMOVE_FILES=$$(grep " .debug_info" $(BUILD_DIR)/slim.map | grep "0x0* " | \
 grep $(OBJ_DIR) | sed '$$d;s|.*$(OBJ_DIR)/||g;s/\.o$$//g'); \
+[ -z "$$REMOVE_FILES" ] || echo "$$REMOVE_FILES"; \
 for i in $$REMOVE_FILES; do sed -i "/[= \/]$$i/d" $(filter %file.mk, $(MAKEFILE_LIST)); \
 done
 else
 	@REMOVE_FILES=$$(grep " .debug_info" $(BUILD_DIR)/slim.map | grep "0x0* " | \
-grep $(OBJ_DIR) | sed '$$d;s|.*$(OBJ_DIR)|.|g;s/\.o$$//g'); \
-for i in $$REMOVE_FILES; do j=$$i; while true; do j=$${j%/*}; \
-if [ -f $$j/file.mk ]; then sed -i "/[= \/]$${i#$$j/}/d" $$j/file.mk; break; fi; \
-done; done
+grep $(OBJ_DIR) | sed '$$d;s|.*$(OBJ_DIR)/||g;s/\.o$$//g'); \
+REMOVE_INTERN_FILES=$$(echo "$$REMOVE_FILES" | grep -v '\.\./\|^/\|^~'); \
+[ -z "$$REMOVE_INTERN_FILES" ] || echo "$$REMOVE_INTERN_FILES"; \
+REMOVE_EXTERN_FILES=$$(echo "$$REMOVE_FILES" | grep '\.\./\|^/\|^~' | \
+sed 's|^[^.]*/\.\.|..|g'); \
+[ -z "$$REMOVE_EXTERN_FILES" ] || echo "$$REMOVE_EXTERN_FILES"; \
+for i in $$REMOVE_INTERN_FILES; do j=$$i; m=0; while true; do j=$${j%/*}; \
+if [ -f $$j/file.mk ]; then i=$${i#$$j/}; [ $$m -eq 1 ] && i=$${i////[/]}; \
+sed -i "/[= \/]$$i/d" $$j/file.mk; break; else m=1; fi; done; done; \
+for i in $$REMOVE_EXTERN_FILES; do sed -i "s|.*[= \/]$$i.*|==|g;/^==/d" \
+$(filter %file.mk, $(MAKEFILE_LIST)); done
 endif # ifeq ($(VPATH_MODE),y)

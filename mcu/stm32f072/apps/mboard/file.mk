@@ -1,7 +1,7 @@
 ###############################################################################
-# Verison: v2.0.0
+# Verison: v2.1.0
 # Author:  xflm
-# Date:    Sat Feb 20 12:29:57 CST 2021
+# Date:    Sun Mar 14 23:18:44 CST 2021
 ###############################################################################
  
 # Define create lib name
@@ -22,8 +22,11 @@ PATH_INC +=
 # Define library file
 FILE_LIB += 
  
-# Define library file
+# Define other file
 FILE_OTHER += 
  
+# Define spare file
+SPARE_FILE += 
+ 
 # Include lib.mk
-include tools/make/lib.mk
+include $(TEMPLATE)/tools/make/lib.mk

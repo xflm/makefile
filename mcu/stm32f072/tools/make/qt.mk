@@ -1,5 +1,5 @@
 ###############################################################################
-# Verison: v2.0.0
+# Verison: v2.1.0
 # Author:  xflm
 # Date:    Sat Dec 19 09:11:46 CST 2020
 ###############################################################################
@@ -24,7 +24,7 @@ qt: $(TARGET_INC)
 	@mkdir -p .qt
 # '^' in addprefix cmd is used to avoid difference from windows and linux
 # In linux use: $(addprefix \\\\\n    ../, $(INC_FILE)), it can instead of tr cmd
-	@echo "DEFINES += "$(DEFINES)"^" \
+	@echo "DEFINES += "$(BOARD) $(DEFINES)"^" \
           "^HEADERS += $(addprefix \^&../, $(filter-out /%, $(shell cat $(TARGET_INC))))" \
 		  "$(addprefix \^&, $(filter /%, $(shell cat $(TARGET_INC))))^" \
           "^INCLUDEPATH += $(addprefix \^&../, $(INCLUDEPATH_NORMAL))" \

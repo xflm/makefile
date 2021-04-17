@@ -12,9 +12,11 @@
 │　　├── file.mk　　　　　　　　　　- - - 列表文件  
 │　　├── main.c　　　　　　　　　　- - -  源码文件  
 │　　└── tools  
+│　　 　　└── bash　　　　　　　　　- - - 辅助脚本  
+│　　 　　│　 └── create.sh　　　　- - -  工程拷贝  
 │　　 　　└── make　　　　　　　　　- - - 辅助脚本  
 │　　 　　 　　├── clone.mk　　　　- - -  工程拷贝  
-│　　 　　 　　├── create.sh　　　　- - - 工程构造  
+│　　 　　 　　├── create.mk　　　　- - - 工程构造  
 │　　 　　 　　├── files.mk　　　　- - -  打印文件列表  
 │　　 　　 　　├── help.mk　　　　　- - - 打印帮助文档  
 │　　 　　 　　├── lib.mk　　　　　- - -  编译静态库，被file.mk调用  

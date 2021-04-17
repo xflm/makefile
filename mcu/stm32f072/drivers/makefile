@@ -1,34 +1,36 @@
 ###############################################################################
-# Version: v2.0.0
+# Version: v2.1.0
 # Author:  xflm
-# Date:    Sat Dec 19 09:11:46 CST 2020
+# Date:    Fri Feb 26 17:03:14 CST 2021
 ###############################################################################
 
 # Define toolchain path, default $(G_TOOLCHAIN)
 TOOLCHAIN = $(G_TOOLCHAIN)
 
-# Define build type:  $(G_BUILD_TYPE) (null) debug profile release
-#BUILD_TYPE = $(G_BUILD_TYPE)
-BUILD_TYPE =
+# Define template path, default $(G_TEMPLATE)
+TEMPLATE = $(G_TEMPLATE)
+
+# Define board name, default $(G_BOARD)
+BOARD = $(G_BOARD)
+
+# Define build type: $(G_BUILD_TYPE) (null) debug profile release
+BUILD_TYPE = $(G_BUILD_TYPE)
+#BUILD_TYPE =
 #BUILD_TYPE = debug
 #BUILD_TYPE = profile
 #BUILD_TYPE = release
 
-# Append global macro
-DEFINES =
+# Append global macro, default $(G_DEFINES)
+USERDEFINES  = $(G_DEFINES)
+USERDEFINES +=
 
-# Append core infomation, default $(G_CPU)
-CPU = $(G_CPU)
+# Append cpu infomation, default $(G_CPU)
+USERCPU  = $(G_CPU)
+USERCPU +=
 
-# Append standard library
-STDLIB =
-
-# Append GCC flags, default $(G_INCFLAGS) $(G_DEFINEFLAGS)
-CFLAGS  = $(G_INCFLAGS) $(G_DEFINEFLAGS)
-CFLAGS += -O0 -g3
-
-# Append LD flags
-LDFLAGS =
+# Append GCC flags, default $(G_INCFLAGS)
+USERCFLAGS  = $(G_INCFLAGS)
+USERCFLAGS +=
 
 # Use vpath mode, y is enable, default is disable
 VPATH_MODE = y
@@ -46,4 +48,4 @@ TARGET_TYPE = lib
 ifneq ($(VPATH_MODE),)
 OBJ_DIR = $(BUILD_DIR)/$(FILE_PWD)/.obj
 endif
-include tools/make/make.mk
+include $(TEMPLATE)/tools/make/make.mk

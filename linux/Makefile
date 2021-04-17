@@ -1,23 +1,24 @@
 ###############################################################################
-# Version: v2.0.0
+# Version: v2.1.0
 # Author:  xflm
-# Date:    Sat Dec 19 09:11:46 CST 2020
+# Date:    Fri Feb 26 17:03:14 CST 2021
 ###############################################################################
 
 # Define toolchain path
-TOOLCHAIN =
+TOOLCHAIN = 
+
+# Define template path
+TEMPLATE = .
 
 # Define target name
 TARGET = hello
 
-# Define target type: elf exe lib
-#TARGET_TYPE = elf
+# Define board name: 
+BOARD = 
+
+# Define target type: exe lib
 TARGET_TYPE = exe
 #TARGET_TYPE = lib
-
-# Define run type: rom ram
-#RUN_TYPE = rom
-RUN_TYPE = ram
 
 # Define build type: (null) debug profile release
 #BUILD_TYPE =
@@ -25,41 +26,35 @@ RUN_TYPE = ram
 BUILD_TYPE = profile
 #BUILD_TYPE = release
 
-# Define link file
-LINK_FILE =
-
 # Append global macro
-DEFINES =
-
-# Append cpu infomation
-CPU =
+USERDEFINES = 
 
 # Append standard library
-STDLIB = 
+USERSTDLIB = 
 
 # Append GCC flags
-CFLAGS =
+USERCFLAGS = 
 
 # Append LD flags
-LDFLAGS = 
+USERLDFLAGS = 
 
-# Use vpath mode: y is enable, default is disable
-VPATH_MODE =
+# Use vpath mode, y is enable, default is disable
+VPATH_MODE = 
 
-# Use grabage collection mode, y is enable, default is disable
+# Use garbage collection mode, y is enable, default is disable
 GARBAGE_COLLECTION = y
 
 # Create files, y is create, default is not create
-CREATE_DIS =
-CREATE_ASM =
-CREATE_BIN =
-CREATE_HEX =
-CREATE_MAP =
-CREATE_GC  =
+CREATE_DIS = 
+CREATE_ASM = 
+CREATE_BIN = 
+CREATE_HEX = 
+CREATE_MAP = 
+CREATE_GC  = 
 
 # Define shell cmd, run before and after compile
 # like: CMD_BEFORE = echo -n ===; echo ===
-CMD_BEFORE =
-CMD_AFTER =
+CMD_BEFORE = 
+CMD_AFTER = 
 
-include tools/make/make.mk
+include $(TEMPLATE)/tools/make/make.mk

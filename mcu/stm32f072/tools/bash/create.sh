@@ -1,12 +1,12 @@
 #!/bin/bash
 ###############################################################################
-# Verison: v2.0.0
+# Verison: v2.1.0
 # Author:  xflm
-# Date:    Sat Dec 19 09:11:46 CST 2020
+# Date:    Fri Feb 26 17:03:14 CST 2021
 ###############################################################################
 
 
-FILE_MK_VERSION=v2.0.0
+FILE_MK_VERSION=v2.1.0
 FILE_MK_AUTHER=$USER
 FILE_MK_DATE=$(date)
 
@@ -74,6 +74,12 @@ ABS_A=$(echo "$ABS_FILE" | grep "\.a$")
 MK_PATH=$(echo "$NORMAL_FILE" | grep "/file.mk$" | sed "s|file.mk||g" | sort -r)
 MK_PATH_ARRAY=($MK_PATH)
 
+# Retain OTHER_FILE and SPARE_FILE in file.mk
+OTHER_FILE=$(grep OTHER_FILE file.mk)
+[ -z "$OTHER_FILE" ] && OTHER_FILE="OTHER_FILE += "
+SPARE_FILE=$(grep SPARE_FILE file.mk)
+[ -z "$SPARE_FILE" ] && SPARE_FILE="SPARE_FILE += "
+
 # back up *file.mk.
 mkdir -p make_create_bak
 RECOVER_SCRIPT="#!/bin/bash^ ^"
@@ -105,13 +111,13 @@ for i in $MK_PATH; do
 	NORMAL_A=$(echo -n "$NORMAL_A" | grep -v "^$i")
 
 	j=$(echo "$i" | sed "s|[^/]*/|../|g")
-	RELATIVE_C_ARRAY[$n]=$(echo -n "$RELATIVE_C" | grep "$i" | sed "s|[^.]*$i|/$j$i|g;s|^|FILE_SRC += \$(FILE_PWD)/|g")
+	RELATIVE_C_ARRAY[$n]=$(echo -n "$RELATIVE_C" | grep "$i" | sed "s|^|FILE_SRC += \$(FILE_PWD)/$j|g")
 	RELATIVE_C=$(echo -n "$RELATIVE_C" | grep -v "$i")
-	RELATIVE_H_ARRAY[$n]=$(echo -n "$RELATIVE_H" | grep "$i" | sed "s|[^.]*$i|/$j$i|g;s|^|PATH_INC += \$(FILE_PWD)/|g;s|/$||g")
+	RELATIVE_H_ARRAY[$n]=$(echo -n "$RELATIVE_H" | grep "$i" | sed "s|^|PATH_INC += \$(FILE_PWD)/$j|g;s|/$||g")
 	RELATIVE_H=$(echo -n "$RELATIVE_H" | grep -v "$i")
-	RELATIVE_S_ARRAY[$n]=$(echo -n "$RELATIVE_S" | grep "$i" | sed "s|[^.]*$i|/$j$i|g;s|^|FILE_ASM += \$(FILE_PWD)/|g")
+	RELATIVE_S_ARRAY[$n]=$(echo -n "$RELATIVE_S" | grep "$i" | sed "s|^|FILE_ASM += \$(FILE_PWD)/$j|g")
 	RELATIVE_S=$(echo -n "$RELATIVE_S" | grep -v "$i")
-	RELATIVE_A_ARRAY[$n]=$(echo -n "$RELATIVE_A" | grep "$i" | sed "s|[^.]*$i|/$j$i|g;s|^|FILE_LIB += \$(FILE_PWD)/|g")
+	RELATIVE_A_ARRAY[$n]=$(echo -n "$RELATIVE_A" | grep "$i" | sed "s|^|FILE_LIB += \$(FILE_PWD)/$j|g")
 	RELATIVE_A=$(echo -n "$RELATIVE_A" | grep -v "$i")
 
 	ABS_C_ARRAY[$n]=$(echo -n "$ABS_C" | grep "$i" | sed "s|^|FILE_SRC += |g")
@@ -127,10 +133,10 @@ for i in $MK_PATH; do
 	((n++))
 done
 
-FILE_MK_VERSION_CHECK='###############################################################################^
-# Verison: '$FILE_MK_VERSION'^
-# Author:  '$FILE_MK_AUTHER'^
-# Date:    '$FILE_MK_DATE'^
+FILE_MK_VERSION_CHECK='###############################################################################
+# Verison: '$FILE_MK_VERSION'
+# Author:  '$FILE_MK_AUTHER'
+# Date:    '$FILE_MK_DATE'
 ###############################################################################^ ^'
 
 # Create */file.mk.
@@ -150,15 +156,17 @@ PATH_INC += ^ ^\
 # Define library file^\
 ${NORMAL_A_ARRAY[$i]}^${RELATIVE_A_ARRAY[$i]}^${ABS_A_ARRAY[$i]}^\
 FILE_LIB += ^ ^\
-# Define library file^\
+# Define other file^\
 FILE_OTHER += ^ ^\
+# Define spare file^\
+SPARE_FILE += ^ ^\
 # Include lib.mk^\
-include tools/make/lib.mk" | tr '^' '\n' | sed "/^$/d" > ${MK_PATH_ARRAY[$i]}/file.mk
+include $""(TEMPLATE)/tools/make/lib.mk" | tr '^' '\n' | sed "/^$/d"\
+> ${MK_PATH_ARRAY[$i]}/file.mk
 done
 
 # Create ./file.mk
-[ -z "$RELATIVE_S" ]
-	echo "$FILE_MK_VERSION_CHECK# Define asm file^\
+echo "$FILE_MK_VERSION_CHECK# Define asm file^\
 $(echo -en "$NORMAL_S\n$RELATIVE_S\n$ABS_S" | sed "s|^|ASM_FILE += |g")^\
 ASM_FILE += ^ ^\
 # Define source file^
@@ -170,8 +178,10 @@ INC_PATH += ^ ^\
 # Define library file^\
 $(echo -en "$NORMAL_A\n$RELATIVE_A\n$ABS_A" | sed "s|^|LIB_FILE += |g")^\
 LIB_FILE += ^ ^\
-# Define library file^\
-OTHER_FILE += ^ ^\
+# Define other file^\
+$OTHER_FILE^ ^\
+# Define spare file^\
+$SPARE_FILE^ ^\
 # Include sub file.mk^\
 $MK_INCLUDE^ ^" | tr '^' '\n' | sed "/^$/d" | uniq > file.mk
 

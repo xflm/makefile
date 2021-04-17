@@ -1,7 +1,7 @@
 ###############################################################################
-# Verison: v2.0.0
+# Verison: v2.1.0
 # Author:  xflm
-# Date:    Sat Dec 19 09:11:46 CST 2020
+# Date:    Fri Feb 26 17:03:14 CST 2021
 ###############################################################################
 
 ###############################################################################
@@ -99,7 +99,10 @@ endif
 endif
 
 INCFLAGS = $(addprefix -I, $(INC_PATH))
-DEFINEFLAGS = $(addprefix -D, $(DEFINES))
+DEFINES += $(USERDEFINES)
+CPU += $(USERCPU)
+STDLIB += $(USERSTDLIB)
+DEFINEFLAGS = $(addprefix -D, $(BOARD) $(DEFINES))
 CFLAGS  += $(CPU) $(INCFLAGS) $(DEFINEFLAGS)
 LDFLAGS += $(CPU) $(STDLIB)
 ifeq ($(TARGET_TYPE),elf)
@@ -113,12 +116,14 @@ ifneq ($(TARGET_MAP),)
 # Create cross reference table and map file
 LDFLAGS += -Wl,--cref,-Map=$(TARGET_MAP)
 endif
+CFLAGS  += $(USERCFLAGS)
+LDFLAGS += $(USERLDFLAGS)
 
 ###############################################################################
 # This is base target
 .PHONY: all debug FORCE
 # This expend function target
-.PHONY: clone files help qt slim tags
+.PHONY: clone create files help qt slim tags
 # Avoid create target file
 .PHONY: all_before 
 
@@ -134,12 +139,18 @@ SRC_FILE :=
 INC_PATH :=
 LIB_FILE :=
 OTHER_FILE :=
+SPARE_FILE :=
 LIB_ASM_FILE :=
 LIB_SRC_FILE :=
 LIB_DEPEND_FILE :=
 VPATH_SRC_FILE :=
 VPATH_ASM_FILE :=
 LIB_DONE := 
+
+###############################################################################
+# Prerequisites
+SPARE_FILE += $(TEMPLATE)/tools/bash/create.sh
+SPARE_FILE += $(TEMPLATE)/tools/make/makefile
 
 ###############################################################################
 # Include file.mk
@@ -149,10 +160,12 @@ include $(FILEMK)
 # export var
 ifeq ($(MAKELEVEL), 0)
 export G_TOOLCHAIN = $(TOOLCHAIN)
+export G_TEMPLATE = $(TEMPLATE)
+export G_BOARD = $(BOARD)
 export G_BUILD_TYPE = $(BUILD_TYPE)
 export G_INC_PATH = $(INC_PATH)
 export G_INCFLAGS = $(INCFLAGS)
-export G_DEFINEFLAGS = $(DEFINEFLAGS)
+export G_DEFINES = $(DEFINES)
 export G_CPU = $(CPU)
 endif
 
@@ -227,10 +240,12 @@ all_done: $(TARGET_LIB) $(TARGET_ELF)
 $(GDBINIT): Makefile
 ifeq ($(RUN_TYPE),ram)
 	@sed -i "s|^\s*file\b.*|file $(TARGET_ELF)|g; \
-      s/.*set.*debug_in_rom.*/set $$""debug_in_rom = 0/g" .gdbinit
+      s|^\s*set.*debug_in_rom.*|set $$""debug_in_rom = 0|g; \
+      s|^\s*source \..*/tools/gdb/|source $(TEMPLATE)/tools/gdb/|g" .gdbinit
 else
 	@sed -i "s|^\s*file\b.*|file $(TARGET_ELF)|g; \
-      s/.*set.*debug_in_rom.*/set $$""debug_in_rom = 1/g" .gdbinit
+      s|^\s*set.*debug_in_rom.*|set $$""debug_in_rom = 1|g; \
+      s|^\s*source \..*/tools/gdb/|source $(TEMPLATE)/tools/gdb/|g" .gdbinit
 endif
 
 ###############################################################################
@@ -273,7 +288,14 @@ endif
 ###############################################################################
 # Create LIB file
 $(TARGET_LIB): $(OBJ_FILE) $(LIB_FILE)
-	@$(AR) cr $(TARGET_LIB) $(OBJ_FILE) $(LIB_FILE)
+ifeq ($(LIB_FILE),)
+	@$(AR) cr $(TARGET_LIB) $(OBJ_FILE)
+else
+	@mkdir -p $(TARGET_DIR)/.libobj; LAYER=$$(echo $(TARGET_DIR)/.libobj/ | \
+sed "s|[^/]*/|../|g"); cd $(TARGET_DIR)/.libobj; for i in $(LIB_FILE); \
+do $(AR) x $$LAYER$$i; done; cd $$OLDPWD
+	@$(AR) cr $(TARGET_LIB) $$(find $(TARGET_DIR)/.libobj -type f) $(OBJ_FILE)
+endif
 ifneq ($(STRIPFLAGS),)
 	@$(STRIP) $(STRIPFLAGS) $(TARGET_LIB)
 endif
@@ -345,9 +367,10 @@ endif
 
 ###############################################################################
 # Add auxiliary function
--include tools/make/tags.mk
--include tools/make/files.mk
--include tools/make/help.mk
--include tools/make/clone.mk
--include tools/make/qt.mk
--include tools/make/slim.mk
+-include $(TEMPLATE)/tools/make/clone.mk
+-include $(TEMPLATE)/tools/make/create.mk
+-include $(TEMPLATE)/tools/make/files.mk
+-include $(TEMPLATE)/tools/make/help.mk
+-include $(TEMPLATE)/tools/make/qt.mk
+-include $(TEMPLATE)/tools/make/slim.mk
+-include $(TEMPLATE)/tools/make/tags.mk

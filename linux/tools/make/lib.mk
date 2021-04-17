@@ -1,7 +1,7 @@
 ###############################################################################
-# Version: v2.0.0
+# Version: v2.1.0
 # Author:  xflm
-# Date:    Sat Dec 19 09:11:46 CST 2020
+# Date:    Fri Feb 26 17:03:14 CST 2021
 ###############################################################################
 
 ifeq ($(MAKELEVEL),0)
@@ -28,8 +28,9 @@ FILE_DEPEND = $(FILE_OBJ:%.o=%.d)
 LIB_DEPEND_FILE += $(FILE_DEPEND)
 LIB_ASM_FILE += $(FILE_ASM)
 LIB_SRC_FILE += $(FILE_SRC)
+LIB_FILE += $(FILE_LIB)
 
-$(BUILD_DIR)/$(FILE_PWD)/lib$(LIB_NAME).a: $(FILE_OBJ) $(FILE_LIB)
+$(BUILD_DIR)/$(FILE_PWD)/lib$(LIB_NAME).a: $(FILE_OBJ)
 	@mkdir -p $(@D)
 	@$(AR) cr $@ $?
 else  # ifneq ($(wildcard $(FILE_PWD)/makefile),)
